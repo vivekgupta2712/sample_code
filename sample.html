@@ -1,0 +1,1294 @@
+<!-- Popup to delete block begins -->
+<div class="modal fade" id="deleteBlockModal" tabindex="-1" role="dialog" aria-labelledby="deleteBlockModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content m-t-7">
+      <div class="modal-header">
+        <h4 class="modal-title" id="deleteBlockModal">Are you sure ?</h4>
+        <a type="" data-dismiss="modal" aria-label="Close">
+          <img src="../assets/images/cancel.png" alt="" class="modal-close">
+        </a>
+      </div>
+      <div class="modal-body">
+        <h5 class="text-muted">You'll lose this block </h5>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" (click)="deleteBlock(block)" data-dismiss="modal">Yes</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Popup to delete block ends -->
+<!-- Popup to delete group begins -->
+<div class="modal fade" id="deleteGroupModal" tabindex="-1" role="dialog" aria-labelledby="deleteGroupModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content m-t-7">
+      <div class="modal-header">
+        <h4 class="modal-title" id="deleteBlockModal">Are you sure ?</h4>
+        <a type="" data-dismiss="modal" aria-label="Close">
+          <img src="../assets/images/cancel.png" alt="" class="modal-close">
+        </a>
+      </div>
+      <div class="modal-body">
+        <h5 class="text-muted">You'll lose this group </h5>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" (click)="deleteGroup()" data-dismiss="modal">Yes</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Popup to delete group ends -->
+<!-- Top Nav Start-->
+<div class="row" style="height: 100%;
+min-height: 600px;">
+  <!-- Left-nav -->
+  <div>
+    <div class="card nav-card sub-nav" style="padding-top: 0rem;position: fixed;width: 260px;visibility:visible;">
+      <div class="scrollbox">
+        <div class="card-body back-grey nav-shadow" style="visibility: visible;    margin-left: 0.5rem;">
+          <!-- List of groups sorted by _id -->
+          <div *ngFor="let group of groups | orderBy : '_id'" class="trash">
+            <input *ngIf="first_group._id!=group._id && group._id != broadcastGroup_id" #title type="text" class="form-control transparent-form f-clr p-t-1" [(ngModel)]="this.group.title" (blur)="updateGroupName(this.group)" (click)="tempName = this.group.title" (keyup.escape)="this.group.title = tempName;title.blur()" (keyup.enter)="updateGroupName(this.group)" style="width:100%;background-color: transparent; margin-left: -15px;
+        font-size: 18px;border-color: #fbfbfd00 !important; margin-left: -18px !important;">
+            <h3 *ngIf="first_group._id==group._id && group._id != broadcastGroup_id" class="f-clr" style="font-size:18px; margin-left: -4px;margin-top: 0.8rem;">{{group.title}}</h3>
+            <div data-toggle="modal" data-target="#deleteGroupModal" data-whatever="@mdo" *ngIf="first_group._id!=group._id" class="bin-group group-bin-padding" (click)="saveGroup(group)">
+              <a>
+                <i class="ti-close w22"></i>
+              </a>
+            </div>
+            <div class="row">
+              <!-- List of blocks sorted by _id -->
+              <div *ngFor="let block of blocks | orderBy : '_id'">
+                <!-- Listing blocks which belong to a group being displayed -->
+                <div *ngIf="block.parent_group==group._id && block.parent_group != broadcastGroup_id" (click)="displayBlock(block._id)" class="wrapper-btn">
+                  <p class="wrapper-p">{{block.title}}</p>
+                </div>
+              </div>
+              <div *ngIf="group._id!=groups[0]._id && group._id != broadcastGroup_id" class="block-btn" (clickOutside)="onClickedOut(group,$event)">
+                <p class="wrapper-p" (click)="group.active=false;saveGroup(group);clear();group.active=true">
+                  <i class="ti-plus"></i> Add Blocks</p>
+                <!-- Create block -->
+                <div *ngIf="group.active" class="block-pop">
+                  <div class="card pop-card">
+                    <div *ngIf="group.conflict" class="speech-bubble-alert" style="z-index:5;position:absolute;margin-top:-2rem">
+                      Conflict: Block with requested title already exists
+                    </div>
+                    <div class="card-body">
+                      <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter Block name" [(ngModel)]="block_name" (keyup.enter)="addNewBlock(block_name, group._id,group);group.active=false">
+                      <div class="text-center" style="margin-top: 6px">
+                        <button class="btn btn-success btn-block" type="button" name="button" (click)="addNewBlock(block_name, group._id,group)" data-dismiss="modal">Save</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Text Popup start here it is  -->
+              </div>
+            </div>
+          </div>
+          <!-- Create Group -->
+          <div class="row">
+            <div class="col-md-12" style="display:inline">
+              <input #groupTitle id="groupTitle" name="groupTitle" type="text" class="form-control transparent-form f-clr p-t-1 add-group" placeholder={{addGroup}} [(ngModel)]="group_name" (blur)="groupFocus = false;clear();addGroup ='+ Add Group' " (keyup.enter)="addNewGroup(group_name);groupPop=false" (focus)="groupFocus = true;addGroup = 'Enter Group Name'" [class.border-add-group]="groupFocus" [style.font-style]="groupFocus ? 'italic' : null">
+            </div>
+          </div>
+          <div class="clear" style="margin-bottom:6rem">
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Left Nav ends -->
+  <!-- Right Nav Begins -->
+  <div class="col-md-6 p-l-0 m-t-2 main-content">
+    <!-- Display block -->
+    <div class="row" style="margin-bottom: -1rem !important;">
+      <div *ngIf="first_group._id!=block.parent_group" class="pad-deflt" style="display:inline">
+        <div *ngIf="block.conflict" class="speech-bubble-alert" style="z-index:999;position:absolute;margin-top:-2rem;margin-left: -6rem;">
+          Conflict: Block with requested title already exists
+        </div>
+        <span class="flex-cls">
+          <span class="inner-cls f-clr" style="font-size:18px;word-break:normal!important;" contenteditable="true" #blockName spellcheck="false" 
+          (blur)="updateBlockName(block,blockName.innerText)"
+            [(innerText)]="this.block.title" (keyup)="(blockName.innerHTML.length > 60) ? (this.block.title = spliceEnd(blockName.innerText,this.block.title)) : a=a"
+            (keyup.enter)="blockName.blur();" (keydown.enter)="false"></span>
+        <span class="switch r-4" style="display:inline">
+            <label>
+              <input type="checkbox" checked>
+              <span class="lever switch-col-purple" style="margin-left: 35px;margin-top: 6px;"></span>
+        </label>
+        </span>
+        <!-- Delete block -->
+        <span class="bin-gallery" *ngIf="first_group._id!=block.parent_group" (click)="selectBlock(block)">
+            <a data-toggle="modal" data-target="#deleteBlockModal" data-whatever="@mdo">
+              <i class="ti-trash f-s-20" style="float:right;margin-top:5px; margin-left: 30px !important;"></i>
+            </a>
+          </span>
+        </span>
+      </div>
+      <div *ngIf="first_group._id==block.parent_group" class="col-lg-4 col-md-6 col-sm-5 col-6 pad-deflt" style="display:inline">
+        <h3 class="f-clr" style="font-size:18px">{{block.title}}</h3>
+      </div>
+      <div *ngIf="first_group._id==block.parent_group">
+        <div class="col-md-1 switch r-4" style="display:inline">
+          <label>
+            <input type="checkbox" checked>
+            <span class="lever switch-col-purple" style="margin-top: 6px;"></span>
+          </label>
+        </div>
+      </div>
+      <div>
+        <div *ngIf="blocklink" class="speech-bubble-alert" style="z-index:99;position:absolute;margin-top:-2rem;margin-left:-6rem">
+          Copy link to block
+        </div>
+        <a (mouseover)="blocklink = true" (mouseout)="blocklink = false" class="fa fa-copy" style="cursor:pointer;    margin-top: 6px;
+      margin-left: -40px;" (click)="clipboardCopy()"></a>
+      </div>
+    </div>
+    <!-- Display list of cards -->
+    <div *ngFor="let card of block.cards">
+<!-- Coupon Card -->
+<div *ngIf="card.plugin_id=='promo'" class="coupon-card ">
+  <div class="col-md-5 trash-type" (clickOutside)="card.promo = false">
+      <div data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo" class="bin-promo padding-bin" (click)="selectCard(card)">
+          <a>
+            <i class="ti-close w22" style="margin-right: -10px;"></i>
+          </a>
+        </div>
+<div class="promo-coupon-wrapper" [class.red-border]="!card.is_valid">
+<div class="input-icon">
+<input #promoList type="text" class="promo-name" name="promo" placeholder="Enter Promo Code" [(ngModel)]="card.config.text" (keyup)=promoFilter(promoList.value) (click)="promoFilter(promoList.value);card.promo = true">
+
+    <div *ngIf="card.promo" class="suggestions  block-lst-scroll" style="position:absolute;width:13.5rem">
+      <ul *ngFor="let promo of filteredPromos; let k = index" (click)="selectPromo(promo,card);card.promo = false" style=" padding-left: 11px;margin-bottom:6px;">
+        <span style="cursor:pointer">{{promo.name}}</span>
+      </ul>
+    </div>
+<br>
+<i class="fa fa-tag"></i>
+</div>
+
+</div>
+<div class="" *ngFor="let button of card.config.buttons; let j = index">
+<div class="bin-btnn padding-bin-text" data-toggle="modal" data-whatever="@mdo" (click)="deleteButton(button, card.config.buttons,card)">
+<a>
+  <i class="ti-close w22" style="margin-right: -6px"></i>
+</a>
+</div>
+<button type="button" class="btn btn-block btn-primary added-btn" [class.top-border]="j==0" (click)="assignButtonContent(button);button.active=!button.active;button.first_clk = true">{{button.title}}</button>
+<!-- Text Popup start -->
+<div *ngIf="button.active" class="text-pop" (clickOutside)="(!button.active || button.first_clk) ? (button.first_clk = false) : (closeAllPop(card)(remBlockFromTextButton(card,button, j)))">
+<div class="card pop-card">
+  <div class="card-body">
+    <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter button name" maxlength="{{result.buttons.title.max}}" [(ngModel)]="button.title" (blur)="remBlockFromTextButton(card,button, j)" (keyup.enter)="remBlockFromTextButton(card,button, j);buttonblock.focus();filter()">
+    <!-- Nav tabs start-->
+    <ul class="nav nav-tabs customtab" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" style="padding: 15px 7px !important; font-size: 14px;" data-toggle="tab" href="#profile2" role="tab">
+          <span class="hidden-sm-up">
+            <i class="ti-website"></i>
+          </span>
+          <span class="hidden-xs-down">Open website</span>
+        </a>
+      </li>
+    </ul>
+    <!-- Nav tabs end -->
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <div class="tab-pane active" id="profile2" role="tabpanel">
+        <div class="p-14">
+          <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter response url" [(ngModel)]="button.url" (keyup.enter)="remBlockFromTextButton(card,button, j);button.active=!button.active">
+        </div>
+      </div>
+    </div>
+    <!-- Tab panes end-->
+    <div class="text-center">
+      <!-- <button class="btn btn-success btn-block" type="button" name="button" (click)="remBlockFromTextButton(card,button, j);button.active=!button.active"data-dismiss="modal">save</button> -->
+    </div>
+  </div>
+</div>
+</div>
+<!-- Text Popup end -->
+</div>
+<button type="button" class="btn btn-block add-promo" (click)="clear();card.active=!card.active;card.first_clk = true" *ngIf="card.config.buttons.length<1">
+  + Add button
+</button>
+<!-- Text Popup start -->
+<div *ngIf="card.active" class="text-pop" (clickOutside)="(!card.active || card.first_clk) ? (card.first_clk = false) : (  closeAllPop(card)   (this.addNewButton(card)   ))">
+<div class="card pop-card">
+<div class="card-body">
+  <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter button name" maxlength="{{result.buttons.title.max}}" [(ngModel)]="newButton.title" (keyup.enter)="cardurl.focus()">
+  <!-- Nav tabs start-->
+  <ul class="nav nav-tabs customtab" role="tablist">
+    <li class="nav-item">
+      <a class="nav-link active" style="padding: 15px 7px !important; font-size: 14px;" data-toggle="tab" href="#profile2" role="tab">
+        <span class="hidden-sm-up">
+          <i class="ti-website"></i>
+        </span>
+        <span class="hidden-xs-down">Open website</span>
+      </a>
+    </li>
+  </ul>
+  <!-- Nav tabs end -->
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <div class="tab-pane active" id="profile2" role="tabpanel">
+      <div class="p-14">
+        <input type="text" id="cardurl" #cardurl class="form-control form-control-sm form-styl" placeholder="Enter response url" [(ngModel)]="newButton.url" [class.boxcolor]="newButton.isvalid_url" (keyup.enter)="addNewButton(card);card.active=!card.active">
+      </div>
+    </div>
+  </div>
+  <!-- Tab panes end-->
+  <div class="text-center">
+    <!-- <button class="btn btn-success btn-block" type="button" name="button" (click)="addNewButton(card);card.active=!card.active"data-dismiss="modal">save</button> -->
+  </div>
+</div>
+</div>
+</div>
+<!-- Text Popup end -->
+</div>
+</div> 
+ <!-- End of Coupon Card -->
+      <!-- Typing card start -->
+      <div *ngIf="card.plugin_id=='typing'">
+        <div class="row m-l-1">
+          <div class="col-lg-10 col-md-12 col-sm-11 col-11 m-b-30 trash-type m-t-2">
+            <div class="card m-b-0 pad-1">
+              <div class="card-builder pad-0">
+                <div data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo" class="bin-type padding-bin" (click)="selectCard(card)">
+                  <a>
+                    <i class="ti-close w22" style="margin-right: -10px;"></i>
+                  </a>
+                </div>
+                <div class="row">
+                  <div class="col-md-11" style="margin-left:25px">
+                    <h5>Show <span style="font-weight: 600;">"typing
+                      <img src="../assets/images/typing.gif" alt="user" style="width:30px" />"</span> for at least
+                      <span style="    color: #26c6da;">{{card.config.time}} sec</span>
+                    </h5>
+                  </div>
+                  <div class="col-md-11" style="margin-left:20px;">
+                    <input type="range" min="0" [(ngModel)]="card.config.time" class="slider-range" style="margin-bottom: 10px" max="20" step="0.1" id="range" (blur)="updateCard(card)">
+                    <span>0 sec</span>
+                    <span class="align-right">20 sec</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Typing card ends -->
+      <!--===== Text Message Card Start=====-->
+      <div *ngIf="card.plugin_id=='text'" class="row m-l-1">
+        <div class="col-lg-5 col-md-10 col-sm-10 col-9 card-fix m-t-2 m-b-30 trash trash-btnn">
+          <div class="card card-ok m-b-0" [class.red-border]="!card.is_valid">
+            <div class="card-builder">
+              <div data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo" class="bin padding-bin" (click)="selectCard(card)">
+                <a>
+                  <i class="ti-close w22"></i>
+                </a>
+              </div>
+              <textarea (focus)="card.counter = true" (blur)="card.counter = false" #text autosize class="form-control transparent-form" maxlength="{{result.text.text.max}}" rows="5" [(ngModel)]="card.config.text" (blur)="updateCard(card)">
+              </textarea>
+              <span class="counter" name="dfdf" *ngIf="card.counter">{{result.text.text.max-card.config.text.length}}</span>
+            </div>
+          </div>
+          <div class="" *ngFor="let button of card.config.buttons; let j = index">
+            <div class="bin-btnn padding-bin-text" data-toggle="modal" data-whatever="@mdo" (click)="deleteButton(button, card.config.buttons,card)">
+              <a>
+                <i class="ti-close w22" style="margin-right: -6px"></i>
+              </a>
+            </div>
+            <button type="button" class="btn btn-block btn-primary added-btn" [class.top-border]="j==0" (click)="assignButtonContent(button);button.active=!button.active;button.first_clk = true">{{button.title}}</button>
+            <!-- Text Popup start -->
+            <div *ngIf="button.active" class="text-pop" (clickOutside)="(!button.active || button.first_clk) ? (button.first_clk = false) : (closeAllPop(card)(remBlockFromTextButton(card,button, j)))">
+              <div class="card pop-card">
+                <div class="card-body">
+                  <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter button name" maxlength="{{result.buttons.title.max}}" [(ngModel)]="button.title" (blur)="remBlockFromTextButton(card,button, j)" (keyup.enter)="remBlockFromTextButton(card,button, j);buttonblock.focus();filter()">
+                  <!-- Nav tabs start-->
+                  <ul class="nav nav-tabs customtab" role="tablist">
+                    <li class="nav-item" (click)="button.weburl = false">
+                      <a class="nav-link active" style="padding: 15px 24px !important;font-size: 14px;" data-toggle="tab" href="#home2" role="tab">
+                        <span class="hidden-sm-up">
+                          <i class="ti-response"></i>
+                        </span>
+                        <span class="hidden-xs-down">Response</span>
+                      </a>
+                    </li>
+                    <li class="nav-item" (click)="button.weburl = true">
+                      <a class="nav-link" style="padding: 15px 7px !important; font-size: 14px;" data-toggle="tab" href="#profile2" role="tab">
+                        <span class="hidden-sm-up">
+                          <i class="ti-website"></i>
+                        </span>
+                        <span class="hidden-xs-down">Open website</span>
+                      </a>
+                    </li>
+                  </ul>
+                  <!-- Nav tabs end -->
+                  <!-- Tab panes -->
+                  <div class="tab-content">
+                    <div class="tab-pane active" id="home2" role="tabpanel">
+                      <div class="p-14">
+                        <input #buttonblock type="text" class="form-control form-control-sm form-styl" placeholder="Enter response name" [(ngModel)]=query (keyup)=filter() (click)="filter()">
+                        <div class="suggestions  block-lst-scroll" *ngIf="filteredList.length > 0" style="margin-top: 6px;">
+                          <ul *ngFor="let item of filteredList; let k = index" (click)="query = item.title;button.url = ''; (button.title == '') ? (deleteButton(button, card.config.buttons,card)) : (select2(item,card,j))" style=" padding-left: 11px;margin-bottom:6px;">
+                            <span style="cursor:pointer">{{item.title}}</span>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="tab-pane" id="profile2" role="tabpanel">
+                      <div class="p-14">
+                        <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter response url" [(ngModel)]="button.url" (keyup.enter)="remBlockFromTextButton(card,button, j);button.active=!button.active">
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Tab panes end-->
+                  <div class="text-center">
+                    <!-- <button class="btn btn-success btn-block" type="button" name="button" (click)="remBlockFromTextButton(card,button, j);button.active=!button.active"data-dismiss="modal">save</button> -->
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Text Popup end -->
+          </div>
+          <a class="btn btn-success btn-block m-t-05 add-btn" (click)="clear();card.active=!card.active;card.first_clk = true" *ngIf="card.config.buttons.length<3">
+            <i class="ti-plus"></i> Add Button</a>
+          <!-- Text Popup start -->
+          <div *ngIf="card.active" class="text-pop" (clickOutside)="(!card.active || card.first_clk) ? (card.first_clk = false) : (  closeAllPop(card)   (this.addNewButton(card)   ))">
+            <div class="card pop-card">
+              <div class="card-body">
+                <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter button name" maxlength="{{result.buttons.title.max}}" [(ngModel)]="newButton.title" (keyup.enter)="cardblock.focus();filter">
+                <!-- Nav tabs start-->
+                <ul class="nav nav-tabs customtab" role="tablist">
+                  <li class="nav-item">
+                    <a class="nav-link active" style="padding: 15px 24px !important;font-size: 14px;" data-toggle="tab" href="#home2" role="tab">
+                      <span class="hidden-sm-up">
+                        <i class="ti-response"></i>
+                      </span>
+                      <span class="hidden-xs-down">Response</span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" style="padding: 15px 7px !important; font-size: 14px;" data-toggle="tab" href="#profile2" role="tab">
+                      <span class="hidden-sm-up">
+                        <i class="ti-website"></i>
+                      </span>
+                      <span class="hidden-xs-down">Open website</span>
+                    </a>
+                  </li>
+                </ul>
+                <!-- Nav tabs end -->
+                <!-- Tab panes -->
+                <div class="tab-content">
+                  <div class="tab-pane active" id="home2" role="tabpanel">
+                    <div class="p-14">
+                      <input #cardblock type="text" class="form-control form-control-sm form-styl" placeholder="Enter response name" [(ngModel)]=query (keyup)=filter() (click)="filter()">
+                      <div class="suggestions  block-lst-scroll" *ngIf="filteredList.length > 0" style="margin-top: 6px;">
+                        <ul *ngFor="let item of filteredList; let i = index" style="padding-left: 11px;margin-bottom: 6px;">
+                          <span (click)="select(item, card);query=item.title" style="cursor:pointer">{{item.title}}</span>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tab-pane" id="profile2" role="tabpanel">
+                    <div class="p-14">
+                      <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter response url" [(ngModel)]="newButton.url" [class.boxcolor]="newButton.isvalid_url" (keyup.enter)="addNewButton(card);card.active=!card.active">
+                    </div>
+                  </div>
+                </div>
+                <!-- Tab panes end-->
+                <div class="text-center">
+                  <!-- <button class="btn btn-success btn-block" type="button" name="button" (click)="addNewButton(card);card.active=!card.active"data-dismiss="modal">save</button> -->
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Text Popup end -->
+        </div>
+      </div>
+      <!-- =====Text Message Card End=====-->
+      <!-- =====Image Card Start=====-->
+      <div *ngIf="card.plugin_id=='image'" class="row m-l-1 image-card-wrapper" [class.el-element-overlay]="card.config.image_url.length != ''">
+        <div class="col-lg-5 col-md-10 col-sm-10 col-9 card-fix m-b-30 trash m-t-2" (clickOutside)="onClickedOutside(card,$event)">
+          <div class="card m-b-0" [class.red-border]="!card.is_valid">
+            <div class="card-builder pad-0 el-card-item">
+              <div data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo" class="bin-img padding-bin" (click)="selectCard(card)">
+                <a>
+                  <i class="ti-close w22" style="margin-right: -6px;"></i>
+                </a>
+              </div>
+              <div class="text-center el-card-avatar el-overlay-1" (mouseleave)="card.img_url = false">
+                <!--           
+          <img (click)="triggerFile(textImage)" class="card-img-top img-responsive" src="{{card.config.image_url}}" onerror="this.src='../assets/images/img.png'"
+          alt="" style="width: 100% !important;">
+           -->
+                <div *ngIf="card.load" class="image-loader loader"></div>
+                <div *ngIf="!card.load && card.config.image_url != ''">
+                  <img (click)="triggerFile(textImage);" class="card-img-top img-responsive" src="{{card.config.image_url}}" style="height: 225px;">
+                  <div class="el-overlay">
+                    <ul class="el-info">
+                      <li *ngIf="!card.img_url" style="padding:7px">
+                        <a class="btn default btn-outline image-popup-vertical-fit" (click)="triggerFile(textImage)">Upload</a>
+                      </li>
+                      <li *ngIf="!card.img_url" style="padding:7px">
+                        <a class="btn default btn-outline red" #trigger2 (click)="card.img_url = true;triggerFile(trigger1)">Image URL</a>
+                      </li>
+                      <li *ngIf="!card.img_url" style="padding:7px">
+                        <a class="btn default btn-outline red" (click)="deleteImage(card,0)">Delete</a>
+                      </li>
+                      <li *ngIf="card.img_url" class="col-md-12 pad-1">
+                        <input type="text" class="form-control form-control-sm form-styl-type" placeholder="Paste Image Link" [(ngModel)]="card.config.image_url" (blur)="updateCard(card)">
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <div *ngIf="!card.load && card.config.image_url == ''">
+                  <div *ngIf="!card.img_url" class="row" style="margin-top:2.2rem;margin-bottom:2rem;">
+                    <!-- <img (click)="triggerFile(textImage)" class="img-responsive card-img-top dull-image" src="../assets/images/upload.png" onerror="this.src='../assets/images/dull-upload.png'"
+                    alt="" (mouseover)="card.hover = true" (mouseout)="card.hover = false" [class.brighter-image]="card.hover"> -->
+                    <div class="col-md-12 col-sm-12 col-12 text-center">
+                      <i class="fa fa-image f-s-50"></i>
+                      <p class="f-s-14">500 x 260 px</p>
+                      <!-- <img src="../assets/images/dim.png" alt="user" style="opacity: 0.4;width: 74px;margin-bottom: 1rem;"/> -->
+                    </div>
+                    <div class="col-md-6 col-sm-6 col-6 clr-w p-r-0" (click)="triggerFile(textImage)">
+                      <i class="ti-camera f-s-30"></i>
+                      <p class="f-s-13">Upload Image</p>
+                    </div>
+                    <div *ngIf="!card.img_url" class="col-md-6 col-sm-6 col-6 clr-w" (click)="card.img_url = true">
+                      <i class="ti-world f-s-30"></i>
+                      <p class="f-s-13">Image URL</p>
+                    </div>
+                  </div>
+                  <div class="row" class="paste-image-url" *ngIf="card.img_url">
+                    <div class="col-md-12 pad-2">
+                      <input type="text" class="form-control form-control-sm form-styl-type" placeholder="Paste Image Link" [(ngModel)]="card.config.image_url" (blur)="updateCard(card)">
+                    </div>
+                  </div>
+                </div>
+                <div style="opacity:0;max-height:0px;padding:0px 0px 0px 0px;width:0px">
+                  <input #textImage type="file" style="display: none;"  id="imageFile" value="Upload1" accept="image/*" (change)='uploadImage($event,card,0)' />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- ======Image Card End======-->
+      <!-- =====Gallery Card Start======-->
+      <div *ngIf="card.plugin_id=='gallery'" class="gallery-row trash-row m-t-2">
+        <div class="col-lg-5 col-md-10 col-sm-10 col-9  trash trash-btnn gallery-card-spacing" style="visibility: visible;" *ngFor="let gallery_card of card.config.gallery_cards; let g = index">
+          <!-- Card set begins-->
+          <div style="opacity:0;max-height:0px;padding:0px 0px 0px 0px;width:0px">
+            <input #galleryImage type="file" id="galleryImage" value="Upload2" accept="image/*" (change)='uploadImage($event,card,g)' />
+          </div>
+          <div class="card m-b-0" [class.red-border]="galleryValidity(gallery_card)" [class.el-element-overlay]="gallery_card.image_url.length != ''">
+            <div class="card-body-builder pad-0 el-card-item">
+              <div *ngIf="card.config.gallery_cards.length > 1">
+                <div data-toggle="modal" data-whatever="@mdo" class="bin-gallery padding-bin" (click)="deleteButton(gallery_card, card.config.gallery_cards,card)">
+                  <a>
+                    <i class="ti-close" style="margin-right: -6px;"></i>
+                  </a>
+                </div>
+              </div>
+              <div *ngIf="card.config.gallery_cards.length == 1">
+                <div data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo" class="bin-gallery padding-bin" (click)="selectCard(card)">
+                  <a>
+                    <i class="ti-close" style="margin-right: -8px;"></i>
+                  </a>
+                </div>
+              </div>
+              <div class="text-center el-card-avatar el-overlay-1" (mouseleave)="gallery_card.img_url = false">
+                <!-- <img class="img-responsive card-img-top" src="{{gallery_card.image_url}}" onerror="this.src='../assets/images/img.png'" alt="">              
+         -->
+                <div *ngIf="gallery_card.load" class="gallery-loader loader"></div>
+                <div *ngIf="!gallery_card.load && gallery_card.image_url != ''">
+                  <img (click)="triggerFile(galleryImage)" class=" img-responsive card-img-top" src="{{gallery_card.image_url}}" onerror="this.src='../assets/images/dull-upload.png'" style="height: 193px">
+                  <div class="el-overlay">
+                    <ul class="el-info">
+                      <li *ngIf="!gallery_card.img_url">
+                        <a class="btn default btn-outline image-popup-vertical-fit" (click)="triggerFile(galleryImage);">Upload</a>
+                      </li>
+                      <li *ngIf="!gallery_card.img_url">
+                        <a class="btn default btn-outline red" #trigger2 (click)="gallery_card.img_url = true;triggerFile(trigger1)">Image URL</a>
+                      </li>
+                      <li *ngIf="!gallery_card.img_url">
+                        <a class="btn default btn-outline red m-t-1" (click)="deleteImage(card,g)">Delete</a>
+                      </li>
+                      <li *ngIf="gallery_card.img_url" class="col-md-12 pad-1">
+                        <input type="text" class="form-control form-control-sm form-styl-type" placeholder="Paste Image Link" [(ngModel)]="gallery_card.image_url" (blur)="updateCard(card)">
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <div *ngIf="!gallery_card.load && gallery_card.image_url == ''">
+                  <div *ngIf="!gallery_card.img_url" class="row" style="margin-top:2.2rem;margin-bottom:0rem;">
+                    <div class="col-md-12 col-sm-12 col-12 text-center">
+                      <i class="fa fa-image f-s-50"></i>
+                      <p class="f-s-14">500 x 260 px</p>
+                      <!-- <img src="../assets/images/dim.png" alt="user" style="opacity: 0.4;width: 74px;margin-bottom: 1rem;"/> -->
+                    </div>
+                    <div class="col-md-6 col-sm-6 col-6 clr-w p-r-0" (click)="triggerFile(galleryImage)">
+                      <i class="ti-camera f-s-30"></i>
+                      <p class="f-s-13">Upload Image</p>
+                    </div>
+                    <div *ngIf="!gallery_card.img_url" class="col-md-6 col-sm-6 col-6 clr-w p-l-0" (click)="gallery_card.img_url = true">
+                      <i class="ti-world f-s-30"></i>
+                      <p class="f-s-13">Image URL</p>
+                    </div>
+                  </div>
+                  <div class="row" style="    margin-top: 2rem;
+                margin-bottom: 4rem;" *ngIf="gallery_card.img_url">
+                    <div class="col-md-12 pad-2">
+                      <input type="text" class="form-control form-control-sm form-styl-type" placeholder="Paste Image Link" [(ngModel)]="gallery_card.image_url" (blur)="updateCard(card)">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-12 pad-0">
+                <input type="text" (focus)="gallery_card.titleCounter = true" (blur)="gallery_card.titleCounter = false" class="form-control form-control-sm img-form transparent-form placeholder-clr" maxlength="{{result.gallery.title.max}}" placeholder="Heading" [(ngModel)]="gallery_card.title" (blur)="updateCard(card)">
+                <span class="counter" name="dfdf" *ngIf="gallery_card.titleCounter" style="margin-top: -21px;">{{result.gallery.title.max - gallery_card.title.length}}</span>
+                <!-- <input type="text" class="form-control form-control-sm img-form transparent-form" placeholder="Image URL" [(ngModel)]="gallery_card.image_url" (blur)="updateCard(card)"> -->
+                <input type="text" class="form-control form-control-sm img-form transparent-form" placeholder="URL" [(ngModel)]="gallery_card.item_url" (blur)="updateCard(card)">
+                <textarea class="form-control form-control-sm field-margin img-form transparent-form" (focus)="gallery_card.subtitleCounter = true" (blur)="gallery_card.subtitleCounter = false" maxlength="{{result.gallery.subtitle.max}}" rows="3" placeholder="Description" [(ngModel)]="gallery_card.subtitle" (blur)="updateCard(card)" style="padding-bottom:0px"></textarea>
+                <span class="counter" name="dfdf" *ngIf="gallery_card.subtitleCounter">{{result.gallery.subtitle.max-gallery_card.subtitle.length}}</span>
+              </div>
+            </div>
+          </div>
+          <!-- Button list begins -->
+          <div class="" *ngFor="let button of gallery_card.buttons; let j = index">
+            <div data-toggle="modal" data-whatever="@mdo" (click)="deleteButton(button, gallery_card.buttons,card)" class="bin-btnn padding-bin" style="padding: 7px;">
+              <a>
+                <i class="ti-close w22" style="margin-right: -10px;"></i>
+              </a>
+            </div>
+            <button type="button" class="btn btn-block btn-primary added-btn" [class.top-border]="j==0" (click)="assignButtonContent(button);closeAllPop(card);button.active=!button.active;button.first_clk = true">{{button.title}}</button>
+            <!-- Text Popup start gallery  -->
+            <div *ngIf="button.active" class="gallery-pop" (clickOutside)="(!button.active || button.first_clk) ? (button.first_clk = false) : (closeAllPop(card)(remBlockFromGalleryButton(card,button,g,j)))">
+              <div class="card pop-card">
+                <div class="card-body">
+                  <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter button name" maxlength="{{result.buttons.title.max}}" [(ngModel)]="button.title" (keyup.enter)="remBlockFromGalleryButton(card,button,g,j);buttonblock.focus();filter()">
+                  <!-- Nav tabs start-->
+                  <ul class="nav nav-tabs customtab" role="tablist" style="font-size: 14px;">
+                    <li class="nav-item" (click)="button.weburl = false">
+                      <a class="nav-link active" style="padding: 15px 25px !important;" data-toggle="tab" href="#home2" role="tab">
+                        <span class="hidden-sm-up">
+                          <i class="ti-response"></i>
+                        </span>
+                        <span class="hidden-xs-down">Response</span>
+                      </a>
+                    </li>
+                    <li class="nav-item" (click)="button.weburl = true">
+                      <a class="nav-link" data-toggle="tab" href="#profile2" role="tab">
+                        <span class="hidden-sm-up">
+                          <i class="ti-website"></i>
+                        </span>
+                        <span class="hidden-xs-down">Open website</span>
+                      </a>
+                    </li>
+                  </ul>
+                  <!-- Nav tabs end -->
+                  <!-- Tab panes -->
+                  <div class="tab-content">
+                    <div class="tab-pane active" id="home2" role="tabpanel">
+                      <div class="p-14">
+                        <!-- <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter response name"> -->
+                        <input #buttonblock type="text" class="form-control form-control-sm form-styl" placeholder="Enter response name" [(ngModel)]=query (keyup)=filter() (click)="filter()">
+                        <div class="suggestions  block-lst-scroll" *ngIf="filteredList.length > 0" style="margin-top: 6px;">
+                          <ul *ngFor="let item of filteredList; let k = index" style=" padding-left: 11px;margin-bottom:6px">
+                            <span (click)="query = item.title;button.url = ''; (button.title == '') ? (deleteButton(button, gallery_card.buttons,card)) : (select3(item,card,j,g))" style="cursor:pointer">{{item.title}}</span>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="tab-pane" id="profile2" role="tabpanel">
+                      <div class="p-14">
+                        <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter response url" [(ngModel)]="button.url" (blur)="remBlockFromGalleryButton(card,button,g,j)" (keyup.enter)="button.active=!button.active;remBlockFromGalleryButton(card,button,g,j)">
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Tab panes end-->
+                  <div class="text-center">
+                    <!-- <button class="btn btn-success btn-block" type="button" name="button" (click)="button.active=!button.active;remBlockFromGalleryButton(card,button,g,j)"data-dismiss="modal">save</button> -->
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Gallery edit popup end -->
+          </div>
+          <!-- Button list ends -->
+          <!-- Create button begins -->
+          <a class="btn btn-success btn-block m-t-05 add-btn" (click)="clear();closeAllPop(card);gallery_card.active=!gallery_card.active;gallery_card.first_clk = true" *ngIf="card.config.gallery_cards[g].buttons.length<3">
+            <i class="ti-plus"></i> Add Button</a>
+          <!-- Gallery create Popup start -->
+          <div *ngIf="gallery_card.active" class="gallery-pop" (clickOutside)="(!gallery_card.active || gallery_card.first_clk) ? (gallery_card.first_clk = false) : (  closeAllPop(card)   (this.addNewGalleryButton(card, g)   ))">
+            <div class="card pop-card">
+              <div class="card-body">
+                <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter button name" maxlength="{{result.buttons.title.max}}" [(ngModel)]="newButton.title" (keyup.enter)="cardblock.focus();filter()">
+                <!-- Nav tabs start-->
+                <ul class="nav nav-tabs customtab" role="tablist" style="font-size: 14px;">
+                  <li class="nav-item">
+                    <a class="nav-link active" style="padding: 15px 25px !important;" data-toggle="tab" href="#home2" role="tab">
+                      <span class="hidden-sm-up">
+                        <i class="ti-response"></i>
+                      </span>
+                      <span class="hidden-xs-down">Response</span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#profile2" role="tab">
+                      <span class="hidden-sm-up">
+                        <i class="ti-website"></i>
+                      </span>
+                      <span class="hidden-xs-down">Open website</span>
+                    </a>
+                  </li>
+                </ul>
+                <!-- Nav tabs end -->
+                <!-- Tab panes -->
+                <div class="tab-content">
+                  <div class="tab-pane active" id="home2" role="tabpanel">
+                    <div class="p-14">
+                      <!-- <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter response name"> -->
+                      <input #cardblock type="text" class="form-control form-control-sm form-styl" placeholder="Enter response name" [(ngModel)]=query (keyup)=filter() (click)="filter()">
+                      <div class="suggestions  block-lst-scroll" *ngIf="filteredList.length > 0" style="margin-top: 6px;">
+                        <ul *ngFor="let item of filteredList; let i = index" style=" padding-left: 11px;margin-bottom: 6px;">
+                          <span class="abc" (click)="selectgal(item, card,g);query = item.title" style="cursor:pointer">{{item.title}}</span>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tab-pane" id="profile2" role="tabpanel">
+                    <div class="p-14">
+                      <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter response url" [(ngModel)]="newButton.url" [class.boxcolor]="newButton.isvalid_url" (keyup.enter)="addNewGalleryButton(card,g);gallery_card.active=!gallery_card.active">
+                    </div>
+                  </div>
+                </div>
+                <!-- Tab panes end-->
+                <div class="text-center">
+                  <!-- <button class="btn btn-success btn-block" type="button" name="button" (click)="addNewGalleryButton(card,g);gallery_card.active=!gallery_card.active"data-dismiss="modal">save</button> -->
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Create button ends -->
+          <!--Add column begins-->
+        </div>
+        <!--Add column -->
+        <div *ngIf="card.config.gallery_cards.length < 10" class="col-lg-5 col-md-10 col-sm-10 col-10 add-card-margin">
+          <div class="card" (click)="addElementToGalleryCard(card.config.gallery_cards)">
+            <div class="card-add add-hvr">
+              <div class="text-center add-card">
+                <img class="add-gallery" src="../assets/images/add.png" alt="">
+              </div>
+            </div>
+          </div>
+        </div>
+        <!--Add column ends-->
+      </div>
+      <!-- Gallery Card End-->
+      <!-- ========== List Template Card Start ========== -->
+      <div *ngIf="card.plugin_id=='list'" class="row list-card-row">
+
+        <div class="col-lg-5 col-md-10 col-sm-10 col-9 card-fix m-t-2 m-b-30 trash trash-btnn">
+          <div data-toggle="modal" data-target="#exampleModal" data-whatever="" class="bin-list padding-bin" (click)="selectCard(card)">
+            <a>
+              <i class="ti-close w22 close-list"></i>
+            </a>
+          </div>
+          <div class="list-card-wrapper" [style.border]="!card.is_valid ? '1px solid #ec6868': null">
+
+            <div *ngIf="card.config.top_element_style == 'large'" class="list-card list-card-heading" (mouseleave)="card.config.list_cards[0].img_url = false">
+              <span class="remove hover-icon cover-hover-icon" (click)="card.config.top_element_style = 'compact';deleteListItem(card.config.list_cards[0],card.config.list_cards,card)">X</span>
+              <a *ngIf="!card.config.list_cards[0].img_url && !card.config.list_cards[0].load" class="hover-icon" (click)="triggerFile(listImage)"
+                style="cursor:pointer">
+                <i class="fa fa-camera-retro fa-2x"></i>
+                <p>Upload</p>
+              </a>
+              <span *ngIf="(!card.config.list_cards[0].image_url) && (!card.config.list_cards[0].img_url) && !card.config.list_cards[0].load">
+                <a>
+                  <i class="fa fa-picture-o fa-5x"></i>
+                  <p>500 x 200 px</p>
+                </a>
+              </span>
+              <span *ngIf="(card.config.list_cards[0].image_url) &&(!card.config.list_cards[0].img_url) && !card.config.list_cards[0].load">
+                <a>
+                  <img src="{{card.config.list_cards[0].image_url}}" class="" style="    height: 56px;
+                width: 65px;">
+                </a>
+              </span>
+              <a *ngIf="!card.config.list_cards[0].img_url && !card.config.list_cards[0].load" (click)="card.config.list_cards[0].img_url = 'true'"
+                class="hover-icon" style="cursor:pointer">
+                <i class="fa fa-globe fa-2x"></i>
+                <p>URL</p>
+              </a>
+              <a *ngIf="card.config.list_cards[0].img_url && !card.config.list_cards[0].load">
+                <input type="text" class="form-control form-control-sm form-styl-type" placeholder="Paste Image Link" [(ngModel)]="card.config.list_cards[0].image_url"
+                  (blur)="updateCard(card)" style="margin-top: 1.4rem;
+              margin-bottom: 1.4rem;">
+              </a>
+
+              <div *ngIf="card.config.list_cards[0].load" class="list-loader loader"></div>
+
+              <input type="text" (focus)="card.config.list_cards[0].titleCounter = true" (blur)="card.config.list_cards[0].titleCounter = false"
+                class="textfield description" maxlength="{{result.gallery.subtitle.max}}" placeholder="Cover Heading" [(ngModel)]="card.config.list_cards[0].title"
+                (blur)="updateCard(card)" style="text-overflow: ellipsis;">
+              <span class="counter" name="dfdf" *ngIf="card.config.list_cards[0].titleCounter" style="margin-top: -21px">{{result.gallery.title.max - card.config.list_cards[0].title.length}}</span>
+
+              <input type="text" class="textfield url" placeholder="URL" [(ngModel)]="card.config.list_cards[0].item_url" (blur)="updateCard(card);validate(card.config.list_cards[0])"
+                [class.boxcolor]="card.config.list_cards[0].isvalid_url">
+              <input type="text" (focus)="card.config.list_cards[0].subtitleCounter = true" (blur)="card.config.list_cards[0].subtitleCounter = false"
+                class="textfield description" maxlength="{{result.gallery.subtitle.max}}" placeholder="Description" [(ngModel)]="card.config.list_cards[0].subtitle"
+                (blur)="updateCard(card)" style="text-overflow: ellipsis;">
+              <span class="counter" name="dfdf" *ngIf="card.config.list_cards[0].subtitleCounter" style="margin-top: -21px">{{result.gallery.title.max - card.config.list_cards[0].subtitle.length}}</span>
+            </div>
+            
+            <div *ngIf="card.config.top_element_style == 'compact'" (click)="addCoverImage(card)" class="list-card list-card-heading add-cover-image">
+           <span *ngIf="card.config.list_cards.length < 4"><i class="fa fa-camera-retro fa-3x"></i> <br>
+              Add cover Image </span>
+           <span *ngIf="card.config.list_cards.length > 3">
+             <i class="fa fa-camera-retro"></i><br>  Delete an item to add a cover image  </span>
+           </div>
+
+
+            <!-- End of Card Heading -->
+            <div *ngFor="let list_card of card.config.list_cards | slice: ((card.config.top_element_style == 'compact') ? 0 : 1); let i = index">
+              <div class="list-card added-card" (mouseleave)="list_card.img_url = false">
+
+                <div *ngIf="list_card.img_url">
+                  <input type="text" class="form-control form-control-sm form-styl-type" placeholder="Paste Image Link" [(ngModel)]="list_card.image_url"
+                    (blur)="updateCard(card)" style="margin-top: 2.65rem;margin-bottom: 2.65rem;">
+                </div>
+                <div *ngIf="!list_card.img_url" class="row">
+                  <div class="col-xl-4 col-lg-12 push-lg-12 title">
+                    <!-- <input type="text" class="textfield title" placeholder="Title"> -->
+                    <input type="text" (focus)="list_card.titleCounter = true" (blur)="list_card.titleCounter = false" class="textfield title"
+                      maxlength="{{result.gallery.title.max}}" placeholder="Title" [(ngModel)]="list_card.title" (blur)="updateCard(card)"
+                      style="width: 6rem;text-overflow: ellipsis;">
+                    <span class="counter" name="dfdf" *ngIf="list_card.titleCounter" style="margin-top: -21px;margin-right: -35px;">{{result.gallery.title.max - (list_card.title ? list_card.title.length : 0 ) }}</span>
+                    <!-- <input type="text" class="textfield subtitle" placeholder="Subtitle"> -->
+                    <input type="text" (focus)="list_card.subtitleCounter = true" (blur)="list_card.subtitleCounter = false" class="textfield subtitle"
+                      maxlength="{{result.gallery.subtitle.max}}" placeholder="Subtitle" [(ngModel)]="list_card.subtitle" (blur)="updateCard(card)"
+                      style="width: 6rem;text-overflow: ellipsis;">
+                    <span class="counter" name="dfdf" *ngIf="list_card.subtitleCounter" style="margin-top: -21px;margin-right: -35px;">{{result.gallery.title.max - (list_card.subtitle ? list_card.subtitle.length : 0 )}}</span>
+
+                    <!-- <input type="text" class="textfield itemURL" placeholder="Item URL"> -->
+                    <input type="text" class="textfield itemURL" placeholder="Item URL" [(ngModel)]="list_card.item_url" (blur)="updateCard(card);validate(list_card)"
+                      [class.boxcolor]="list_card.isvalid_url">
+
+                  </div>
+                  <!-- End of Title -->
+                  <div *ngIf="!list_card.img_url" class="col-xl-8 col-lg-12 pull-lg-12 added-upload">
+                    <span class="remove" *ngIf="!(card.config.list_cards.length<3)" (click)="deleteListItem(list_card,card.config.list_cards,card)">X</span>
+                    <a class="hover-icon" style="cursor:pointer" (click)="triggerFile(listImageLoop)">
+                      <i class="fa fa-camera-retro"></i>
+                      <p>Upload</p>
+                    </a>
+                    <span *ngIf="!list_card.image_url">
+                      <a>
+                        <i class="fa fa-picture-o fa-3x"></i>
+                        <p class="size">500 x 200 px</p>
+                      </a>
+                    </span>
+                    <span *ngIf="list_card.image_url">
+                      <a>
+                        <img src="{{list_card.image_url}}" class="size" style="height: 44px;
+                      width: 50px;">
+                      </a>
+                    </span>
+                    <a (click)="list_card.img_url = 'true'" class="hover-icon" style="cursor:pointer">
+                      <i class="fa fa-globe"></i>
+                      <p>URL</p>
+                    </a>
+                  </div>
+                  <!-- End of Added Upload -->
+                </div>
+                <!-- End of Row -->
+                <span *ngIf="list_card.buttons[0]">
+                  <button type="button" class="btn add-list-btn" (click)="assignButtonContent(list_card.buttons[0]);closeAllPop(card);list_card.buttons[0].active=!list_card.buttons[0].active;list_card.buttons[0].first_clk = true">
+                    {{list_card.buttons[0].title}}
+                  </button>
+                  <!-- List Create Popup Begins -->
+                  <div *ngIf="list_card.buttons[0].active" class="list-elem-pop" (clickOutside)="(!list_card.buttons[0].active || list_card.buttons[0].first_clk) ? (list_card.buttons[0].first_clk = false) : (  closeAllPop(card)   (remBlockFromListButton(card,list_card.buttons[0],i+ ((card.config.top_element_style == 'compact') ? 0 : 1)  ))   )">
+                    <div class="card pop-card">
+                      <div class="card-body">
+                        <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter button name" maxlength="{{result.buttons.title.max}}"
+                          [(ngModel)]="list_card.buttons[0].title" (keyup.enter)="elementblock.focus();filter()">
+                        <!-- Nav tabs start-->
+                        <ul class="nav nav-tabs customtab" role="tablist">
+                          <li class="nav-item" (click)="list_card.buttons[0].weburl = false">
+                            <a class="nav-link active" style="padding: 15px 24px !important;font-size: 14px;" data-toggle="tab" href="#home2" role="tab">
+                              <span class="hidden-sm-up">
+                                <i class="ti-response"></i>
+                              </span>
+                              <span class="hidden-xs-down">Response</span>
+                            </a>
+                          </li>
+                          <li class="nav-item" (click)="list_card.buttons[0].weburl = true">
+                            <a class="nav-link" style="padding: 15px 7px !important; font-size: 14px;" data-toggle="tab" href="#profile2" role="tab">
+                              <span class="hidden-sm-up">
+                                <i class="ti-website"></i>
+                              </span>
+                              <span class="hidden-xs-down">Open website</span>
+                            </a>
+                          </li>
+                        </ul>
+                        <!-- Nav tabs end -->
+                        <!-- Tab panes -->
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="home2" role="tabpanel">
+                            <div class="p-14">
+                              <!-- <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter response name"> -->
+                              <input #elementblock type="text" class="form-control form-control-sm form-styl" placeholder="Enter response name" [(ngModel)]=query
+                                (keyup)=filter() (click)="filter()" (keyup.enter)="remBlockFromListButton(card,list_card.buttons[0],i+((card.config.top_element_style == 'compact') ? 0 : 1)  );list_card.buttons[0].active=false">
+                              <div class="suggestions  block-lst-scroll" *ngIf="filteredList.length > 0" style="margin-top: 6px;">
+                                <ul *ngFor="let item of filteredList; let k = index" style=" padding-left: 11px;margin-bottom:6px">
+                                  <span (click)="(list_card.buttons[0].title == '') ? (deleteButton(button, list_card.buttons,card)) : (selectelemlist(item,card,i))"
+                                    style="cursor:pointer">{{item.title}}</span>
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="tab-pane" id="profile2" role="tabpanel">
+                            <div class="p-14">
+                              <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter response url" [(ngModel)]="list_card.buttons[0].url"
+                                (keyup.enter)="remBlockFromListButton(card,list_card.buttons[0],i+ ((card.config.top_element_style == 'compact') ? 0 : 1));list_card.buttons[0].active=false">
+                            </div>
+                          </div>
+                        </div>
+                        <!-- Tab panes end-->
+                        <div class="text-center">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Text Popup end -->
+                </span>
+                <span *ngIf="!list_card.buttons[0]">
+                  <button type="button" class="btn add-list-btn" (click)="clear();list_card.active=!list_card.active;list_card.first_clk = true">
+                    Add Button
+                  </button>
+                  <!-- Text Popup start -->
+                  <div *ngIf="list_card.active" class="list-elem-pop" (clickOutside)="  (!list_card.active || list_card.first_clk) ? (list_card.first_clk = false) : (  closeAllPop(card)   (addNewListButton(card,i+((card.config.top_element_style == 'compact') ? 0 : 1)    )))">
+                    <div class="card pop-card">
+                      <div class="card-body">
+                        <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter button name" maxlength="{{result.buttons.title.max}}"
+                          [(ngModel)]="newButton.title" (keyup.enter)="elementnewblock.focus();filter()">
+                        <!-- Nav tabs start-->
+                        <ul class="nav nav-tabs customtab" role="tablist">
+                          <li class="nav-item">
+                            <a class="nav-link active" style="padding: 15px 24px !important;font-size: 14px;" data-toggle="tab" href="#home2" role="tab">
+                              <span class="hidden-sm-up">
+                                <i class="ti-response"></i>
+                              </span>
+                              <span class="hidden-xs-down">Response</span>
+                            </a>
+                          </li>
+                          <li class="nav-item">
+                            <a class="nav-link" style="padding: 15px 7px !important; font-size: 14px;" data-toggle="tab" href="#profile2" role="tab">
+                              <span class="hidden-sm-up">
+                                <i class="ti-website"></i>
+                              </span>
+                              <span class="hidden-xs-down">Open website</span>
+                            </a>
+                          </li>
+                        </ul>
+                        <!-- Nav tabs end -->
+                        <!-- Tab panes -->
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="home2" role="tabpanel">
+                            <div class="p-14">
+                              <!-- <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter response name"> -->
+                              <input #elementnewblock type="text" class="form-control form-control-sm form-styl" placeholder="Enter response name" [(ngModel)]=query
+                                (keyup)=filter() (click)="filter()">
+                              <div class="suggestions  block-lst-scroll" *ngIf="filteredList.length > 0" style="margin-top: 6px;">
+                                <ul *ngFor="let item of filteredList; let k = index" style=" padding-left: 11px;margin-bottom:6px">
+                                  <span (click)="query = item.title;selectz(item, card,i)" style="cursor:pointer">{{item.title}}</span>
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="tab-pane" id="profile2" role="tabpanel">
+                            <div class="p-14">
+                              <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter response url" [(ngModel)]="newButton.url"
+                                [class.boxcolor]="newButton.isvalid_url" (keyup.enter)="addNewListButton(card,i);list_card.active=!list_card.active">
+                            </div>
+                          </div>
+                        </div>
+                        <!-- Tab panes end-->
+                        <div class="text-center">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- List create Popup ends -->
+                </span>
+              </div>
+              <!-- End of Added Card -->
+              <div style="opacity:0;max-height:0px;padding:0px 0px 0px 0px">
+                <input style="opacity:0;max-height:0px;padding:0px 0px 0px 0px;width:0px;margin-left:-270px" #listImageLoop type="file" id="imageFile"
+                  value="Upload1" (change)="uploadImage($event,card,i+((card.config.top_element_style == 'compact') ? 0 : 1)   )" accept="image/*" />
+              </div>
+            </div>
+            <div class="list-card list-card-footer text-right" *ngIf="card.config.list_cards.length<4">
+              <button type="button" class="btn add-list-btn" (click)="addListItem(card.config.list_cards,card)">
+                + Add Item
+              </button>
+            </div>
+          </div>
+          <!-- End of Card Wrapper -->
+          <div class="buttons-wrapper">
+            <!--  <div class="circle" style="margin-top: 0px;margin-right:-17px;"><a data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo"><img src="../assets/images/dustbin.png" class="w22" alt=""></a></div> -->
+            <div *ngFor="let button of card.config.buttons; let j = index">
+              <div data-toggle="modal" data-whatever="@mdo" (click)="deleteButton(button, card.config.buttons,card)" class="bin-btnn  close-list-buttons">
+                <a>
+                  <i class="ti-close w22"></i>
+                </a>
+              </div>
+              <button type="button" class="btn btn-block btn-primary add-btn" (click)="assignButtonContent(button);button.active=!button.active;button.first_clk = true">{{button.title}}</button>
+              <!-- Text Popup start -->
+              <div *ngIf="button.active" class="list-pop" (clickOutside)="(!button.active || button.first_clk) ? (button.first_clk = false) : (closeAllPop(card)(remBlockFromTextButton(card,button, 0)))">
+                <div class="card pop-card">
+                  <div class="card-body">
+                    <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter button name" maxlength="{{result.buttons.title.max}}"
+                      [(ngModel)]="button.title" (keyup.enter)="remBlockFromTextButton(card,button, 0);buttonblock.focus();filter()">
+                    <!-- Nav tabs start-->
+                    <ul class="nav nav-tabs customtab" role="tablist">
+                      <li class="nav-item">
+                        <a class="nav-link active" style="padding: 15px 24px !important;font-size: 14px;" data-toggle="tab" href="#home2" role="tab">
+                          <span class="hidden-sm-up">
+                            <i class="ti-response"></i>
+                          </span>
+                          <span class="hidden-xs-down">Response</span>
+                        </a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" style="padding: 15px 7px !important; font-size: 14px;" data-toggle="tab" href="#profile2" role="tab">
+                          <span class="hidden-sm-up">
+                            <i class="ti-website"></i>
+                          </span>
+                          <span class="hidden-xs-down">Open website</span>
+                        </a>
+                      </li>
+                    </ul>
+                    <!-- Nav tabs end -->
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                      <div class="tab-pane active" id="home2" role="tabpanel">
+                        <div class="p-14">
+                          <!-- <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter response name"> -->
+                          <input #buttonblock type="text" class="form-control form-control-sm form-styl" placeholder="Enter response name" [(ngModel)]=query
+                            (keyup)=filter() (click)="filter()">
+                          <div class="suggestions  block-lst-scroll" *ngIf="filteredList.length > 0" style="margin-top: 6px;">
+                            <ul *ngFor="let item of filteredList; let k = index" style=" padding-left: 11px;margin-bottom:6px">
+                              <span (click)="(button.title == '') ? deleteButton(button, card.config.buttons,card) : select2(item,card,j)" style="cursor:pointer">{{item.title}}</span>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="tab-pane" id="profile2" role="tabpanel">
+                        <div class="p-14">
+                          <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter response url" [(ngModel)]="button.url"
+                            (blur)="remBlockFromTextButton(card,button, 0)" (keyup.enter)="remBlockFromTextButton(card,button, 0);button.active=!button.active">
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Tab panes end-->
+                    <div class="text-center">
+                      <!-- <button class="btn btn-success btn-block" type="button" name="button" (click)="remBlockFromTextButton(card,button, 0);button.active=!button.active"data-dismiss="modal">save</button> -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Text Popup end -->
+            </div>
+            <!-- Edit button for whole card end -->
+            <a *ngIf="!card.config.buttons.length" class="btn btn-success btn-block m-t-05 add-btn" (click)="clear();card.active=!card.active;card.first_clk = true">
+              <i class="ti-plus"></i> Add Button
+            </a>
+          </div>
+          <!-- Add button for whole card start -->
+          <div *ngIf="card.active" class="list-pop" (clickOutside)="  (!card.active || card.first_clk) ? (card.first_clk = false) : (  closeAllPop(card)   (this.addNewButton(card)))">
+            <div class="card pop-card">
+              <div class="card-body">
+                <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter button name" maxlength="{{result.buttons.title.max}}"
+                  [(ngModel)]="newButton.title" (keyup.enter)="cardblock.focus();filter()">
+                <!-- Nav tabs start-->
+                <ul class="nav nav-tabs customtab" role="tablist">
+                  <li class="nav-item">
+                    <a class="nav-link active" style="padding: 15px 24px !important;font-size: 14px;" data-toggle="tab" href="#home2" role="tab">
+                      <span class="hidden-sm-up">
+                        <i class="ti-response"></i>
+                      </span>
+                      <span class="hidden-xs-down">Response</span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" style="padding: 15px 7px !important; font-size: 14px;" data-toggle="tab" href="#profile2" role="tab">
+                      <span class="hidden-sm-up">
+                        <i class="ti-website"></i>
+                      </span>
+                      <span class="hidden-xs-down">Open website</span>
+                    </a>
+                  </li>
+                </ul>
+                <!-- Nav tabs end -->
+                <!-- Tab panes -->
+                <div class="tab-content">
+                  <div class="tab-pane active" id="home2" role="tabpanel">
+                    <div class="p-14">
+                      <!-- <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter response name"> -->
+                      <input #cardblock type="text" class="form-control form-control-sm form-styl" placeholder="Enter response name" [(ngModel)]=query
+                        (keyup)=filter() (click)="filter()">
+                      <div class="suggestions  block-lst-scroll" *ngIf="filteredList.length > 0" style="margin-top: 6px;">
+                        <ul *ngFor="let item of filteredList; let i = index" style=" padding-left: 11px;margin-bottom:6px">
+                          <span (click)="select(item, card)" style="cursor:pointer">{{item.title}}</span>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tab-pane" id="profile2" role="tabpanel">
+                    <div class="p-14">
+                      <input type="text" id="" class="form-control form-control-sm form-styl" placeholder="Enter response url" [(ngModel)]="newButton.url"
+                        [class.boxcolor]="newButton.isvalid_url" (keyup.enter)="addNewButton(card);card.active=!card.active">
+                    </div>
+                  </div>
+                </div>
+                <!-- Tab panes end-->
+                <div class="text-center">
+                  <!-- <button class="btn btn-success btn-block" type="button" name="button" (click)="addNewButton(card);card.active=!card.active"data-dismiss="modal">save</button> -->
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Text Popup end -->
+        </div>
+        <div style="opacity:0;max-height:0px;padding:0px 0px 0px 0px">
+          <input style="opacity:0;max-height:0px;padding:0px 0px 0px 0px;width:0px;margin-left:-270px" #listImage type="file" id="imageFile"
+            value="Upload1" (change)='uploadImage($event,card,0)' accept="image/*" />
+        </div>
+
+      </div>
+      <!-- ========== List Template Card End ========== -->
+      <!-- ========== QR card start ========== -->
+      <div *ngIf="card.plugin_id=='quick_reply'" class="row m-l-1 quick-reply-wrapper">
+        <div class="quick-gallery-row full-trash-quick" style="padding-bottom:1rem;padding-top: 2rem" (clickOutside)="onClickedOutside(card,$event)">
+          <div class="fix">
+          </div>
+          <div style="visibility:visible;margin-top:-0.8rem" class="col-xl-3 col-lg-4 col-md-5 col-sm-3 col-6 p-l-0 trash" *ngFor="let button of card.config.buttons; let j = index">
+            <!-- Text Popup start -->
+            <div *ngIf="button.active" class="qr-pop" (clickOutside)="(!button.active || button.first_clk) ? (button.first_clk = false) : (closeAllPop(card))">
+              <div class="card pop-card">
+                <div class="card-body" style="padding: 0rem !important;">
+                  <div class="p-05">
+                    <input type="text" #focusTitle class="qr-input-box m-b-0  form-control form-control-sm form-styl" placeholder="Quick Reply" maxlength="{{result.quick_replies.title.max}}" [(ngModel)]="button.title" (keyup.enter)="focusBlock.focus();blockShow();check(card,button)">
+                    <br>
+                    <input #focusBlock type="text" class="qr-input-box form-control form-control-sm form-styl" placeholder="Enter Block name" [(ngModel)]="query" (keyup.enter)="focusBlock.focus()" (click)="blockShow()" (keyup)="filter()">
+                    <div class="suggestions  block-lst-scroll" *ngIf="blkshw">
+                      <ul style="margin-top: 0px !important;padding-left: 8px !important;
+                    margin-bottom: 0rem !important;" class="ul-list-styl" *ngFor="let item of filteredList; let k = index">
+                        <span (click)="selectQR(item, card,j)" style="cursor:pointer">{{item.title}}</span>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Text Popup end -->
+            <div class="qr-margin">
+              <div *ngIf="card.config.buttons.length > 1">
+                <div class="bin-quick" style="margin-top: 0px;position:relative" (click)="deleteButton(button, card.config.buttons,card)">
+                  <a data-toggle="modal">
+                    <i class="ti-close f-s-14"></i>
+                  </a>
+                </div>
+              </div>
+              <div *ngIf="card.config.buttons.length == 1">
+                <div class="bin-quick bin-btn-close" style="margin-top: 0px;position:relative" (click)="selectCard(card)">
+                  <a data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">
+                    <i class="ti-close f-s-14 btn-quick-close"></i>
+                  </a>
+                </div>
+              </div>
+              <a class="btn hvr btn-quick btn-secondary quick-pad" style="max-height: 36px;" [class.red-border]="!button.block_id" [class.red-border]="!button.title">
+                <input (click)="clear();closeAllPop(card);button.active=!button.active;a(button);assignButtonContent(button);button.first_clk = true" (keyup.enter)="focusTitle.focus();" type="text" class="form-control form-control-sm quick-form  transparent-form  quick-img-form" placeholder="Quick Reply" maxlength="{{result.quick_replies.title.max}}" [(ngModel)]="button.title" [class.quick-img-form-with-block]="button.block_id">
+                <span class="counter-quick quick-counter-form" name="dfdf"></span>
+                <div *ngFor="let block of blockArray">
+                  <p class="quick-block-name m-b-0 f-s-12 quick-para" *ngIf="button.block_id == block.id">{{block.title}}</p>
+                </div>
+              </a>
+            </div>
+          </div>
+          <div *ngIf="card.config.buttons.length < 10" class="" style="margin-right: 1.2rem;margin-top: 0.2rem; visibility:visible">
+            <a class="btn hvr btn-rounded btn-secondary quick-pad" (click)="addElementToQRCard(card.config.buttons, card);clear()" style="padding: 8px 10px">
+              <span class="f-s-12">+ Add Quick Reply</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <!-- ========== QR card End ========== -->
+    </div>
+    <!-- Displaying list of cards ended -->
+    <!-- Icons to generate cards -->
+    <div class="col-md-10 m-t-1 m-b-1" style="padding-bottom: 2rem; margin-left: -1rem; max-width: 200px;">
+      <div class="btn-group btn-group-lg" role="group" aria-label="Basic example">
+        <button type="button" class="btn btn-lg btn-grey bton-card z-zero" (click)="addCard('text')">
+          <img src="../../assets/images/cardIcons/scb-text.svg" alt="" width="45px" height="45px;">
+          <p class="card-spacing">Text</p>
+        </button>
+        <button type="button" class="btn btn-lg btn-grey bton-card z-zero" (click)="addCard('image')">
+          <img src="../../assets/images/cardIcons/scb-image.svg" alt="" width="45px" height="45px;" style="margin-top: -5px;">
+          <p class="card-spacing" style="padding-top: 5px;">Image</p>
+        </button>
+        <button type="button" class="btn btn-lg btn-grey bton-card z-zero" (click)="addCard('gallery')">
+          <img src="../../assets/images/cardIcons/scb-gallery.svg" alt="" width="45px" height="45px;">
+          <p class="card-spacing">Gallery</p>
+        </button>
+        <button type="button" class="btn btn-lg btn-grey bton-card z-zero" (click)="addCard('list')">
+          <img src="../../assets/images/cardIcons/scb-list.svg" alt="" width="45px" height="45px;">
+          <p class="card-spacing">List</p>
+        </button>
+        <button type="button" class="btn btn-lg btn-grey bton-card z-zero" (click)="addCard('quick_reply')">
+          <img src="../../assets/images/cardIcons/scb-quick-reply.svg" alt="" width="44px" height="44px;" style="margin-top: 5px;">
+          <p class="card-spacing" style="margin-top: -5px">Quick reply</p>
+        </button>
+        <button type="button" class="btn btn-lg btn-grey bton-card z-zero" (click)="addCard('typing')">
+          <img src="../../assets/images/cardIcons/scb-typing.svg" alt="" width="45px" height="45px;">
+          <p class="card-spacing">Typing</p>
+        </button>
+        <button type="button" class="btn btn-lg btn-grey bton-card z-zero" (click)="addCard('promo')">
+          <i class="fa fa-tag" style="font-size: 45px;"></i>
+          <p class="card-spacing">Coupon</p>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div>
+  </div>
+  <!-- Iphonex-Preview -->
+  <div class="col-md-3 fix-ix font-lato hidden-md-down">
+    <div class="ibox animated fadeInRight">
+      <!-- Header of the Iphone -->
+      <!-- <div class="ihead">
+<div class="i-head-section">
+<div class="row" style="margin-right: 0px;margin-left: 0px;">
+<div class="col-md-3">
+  <i class=" ti-angle-left i-left"></i>
+  </div>
+  <div class="col-md-6">
+  <h5 class="i-blue">Testsellerpage</h5>
+  </div>
+  <div class="col-md-3">
+  <i class=" ti-angle-right i-right"></i>
+  </div>
+</div>
+<hr class="i-line">
+</div>
+</div> -->
+      <!-- Screen begins -->
+      <div class="iscreen">
+        <div class="i-section">
+          <!-- Detection and displaying of cards on screen -->
+          <div *ngFor="let card of block.cards">
+            <!-- Text card display -->
+            <div *ngIf="card.plugin_id == 'text' && card.is_valid">
+              <div class="clear"></div>
+              <div class="from-them">
+                <p class="m-b-0">{{card.config.text}}</p>
+              </div>
+              <div class="clear"></div>
+              <div *ngFor="let button of card.config.buttons" class="i-button">
+                {{button.title}}
+              </div>
+            </div>
+            <!-- Image card display -->
+            <div *ngIf="card.plugin_id == 'image' && card.is_valid">
+              <div class="clear"></div>
+              <div class="">
+                <img src="{{card.config.image_url}}" alt="" class="i-image-card">
+              </div>
+            </div>
+            <!-- Gallery card display -->
+            <div *ngIf="card.plugin_id == 'gallery' && card.is_valid">
+              <div class="clear"></div>
+              <div class="i-scrl">
+                <div class="iphone-gallery">
+                  <div *ngFor="let gallery_card of card.config.gallery_cards">
+                    <img src="{{gallery_card.image_url}}" alt="" class="i-image-card">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Quick reply card display -->
+            <div *ngIf="card.plugin_id == 'quick_reply' && card.is_valid">
+              <div class="clear"></div>
+              <div class="i-gallery-row">
+                <div *ngFor="let button of card.config.buttons">
+                  <div class="i-quick">
+                    {{button.title}}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- List card diplay -->
+            <div *ngIf="card.plugin_id == 'list' && card.is_valid">
+              <div class="clear"></div>
+              <div class="i-list">
+                <div *ngFor="let list_card of card.config.list_cards" class="row" style="margin-right: 0px;margin-left: 0px;">
+                  <div class="col-md-6">
+                    <p class="m-b-0 f-s-12">{{list_card.title}}</p>
+                    <p class="m-b-0 f-s-12">{{list_card.subtitle}}</p>
+                    <div *ngFor="let button of list_card.buttons" class="list-btn">
+                      <div class="list-btn-styl">{{button.title}}</div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <img src="{{list_card.image_url}}" alt="" class="i-list-card">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="anyCardValid(block.cards)">
+            <img src="../assets/images/sb_icon_light.svg" alt="" style="width: 26px;
+height: 26px;
+margin-left: -25px;
+margin-top: -42px" class="">
+          </div>
+        </div>
+      </div>
+      <!-- Screen ends -->
+      <!-- Iphone Image -->
+      <img src="../assets/images/iphone_x_coloured.png" alt="" style="width: 327px;height: 561px;
+margin-left: -2rem;" class="">
+    </div>
+  </div>
+  <!-- Iphonex-Preview End-->
+</div>
+<!-- Modal to delete card begins -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content m-t-7">
+      <div class="modal-header">
+        <h4 class="modal-title" id="exampleModalLabel1">Are you sure ?</h4>
+        <a type="" data-dismiss="modal" aria-label="Close">
+          <img src="../assets/images/cancel.png" alt="" class="modal-close">
+        </a>
+      </div>
+      <div class="modal-body">
+        <h5 class="text-muted">You'll lose this card </h5>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" (click)="deleteCard(block.cards)" data-dismiss="modal">Yes</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal to delete card ends-->
